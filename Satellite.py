@@ -1,18 +1,19 @@
-from scapy.all import *
 import socket
 import os
 import time
+import hashlib
 
 host = '127.0.0.1'
 port = 55555
 
-def main():
+def main(): #iterate though SATImages and send one image every 10 seconds
     images = os.listdir('./SATImages')
     for i in images:
         send_image(i)
         time.sleep(10)
 
-def send_image(image):
+def send_image(image): #send image to Ground Station
+    #connect to Ground Station
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as e:
@@ -23,17 +24,21 @@ def send_image(image):
     except socket.error as e:
         print("Connect Failed with Error %s" %(e))
 
+    #send Image
     try:
+        #read in image from SATImages
         fd = open('./SATImages/%s' % image, 'rb')
         bytes = fd.read()
+
+        #build packet
         size = len(bytes)
+        msg = 'SIZE ' + str(size) + '\r\n'
 
-        msg = 'SIZE ' + str(size)
-        s.sendall(msg.encode())
-        rec = s.recv(1024)
-        print(rec.decode())
+        hash = hashlib.md5(bytes)
+        msg += 'HASH ' + str(hash.hexdigest()) + '\r\n\r\n'
 
-        s.sendall(bytes)
+        #send packet
+        s.sendall(msg.encode().ljust(128) + bytes) # pad to 128
     finally:
         s.close()
 
