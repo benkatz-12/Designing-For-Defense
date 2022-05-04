@@ -1,4 +1,4 @@
-# Normal Communication
+# Simlualted LEO Satellite Network Normal Communication
 
 This software is used to generate "normal" satellilte communication in a multi-node network for the purpose of generating datasets for the Machine Learning algorithm. All code written in python and can be run by any version. 
 
